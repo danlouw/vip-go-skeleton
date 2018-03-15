@@ -20,7 +20,7 @@ DEPLOY_SUFFIX="${VIP_DEPLOY_SUFFIX:--built}"
 BRANCH="${CIRCLE_BRANCH:-$TRAVIS_BRANCH}"
 
 SRC_DIR="${TRAVIS_BUILD_DIR:-$PWD}"
-BUILD_DIR="/tmp/vip-go-build"
+BUILD_DIR="/tmp/vip-go-build-$(date +%s)"
 
 if [[ $CIRCLECI ]]; then
 	CIRCLE_REPO_SLUG="${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}";
@@ -45,8 +45,7 @@ if [[ -z "${BRANCH}" ]]; then
 fi
 
 if [[ -d "$BUILD_DIR" ]]; then
-	echo "WARNING: ${BUILD_DIR} already exists. You may have accidentally cached this"
-	echo "directory. This will cause issues with deploying."
+	echo "WARNING: ${BUILD_DIR} already exists."
 	exit 1
 fi
 
@@ -86,7 +85,7 @@ if ! command -v 'rsync'; then
 fi
 
 echo "Syncing files... quietly"
-rsync --cvs-exclude -a "${SRC_DIR}/" "${BUILD_DIR}" --exclude-from "${SRC_DIR}/ci/deploy-exclude.txt"
+rsync --cvs-exclude -a "${SRC_DIR}/" "${BUILD_DIR}" --exclude-from "${SRC_DIR}/ci/.deployignore"
 
 # Make up the commit, commit, and push
 # ------------------------------------
